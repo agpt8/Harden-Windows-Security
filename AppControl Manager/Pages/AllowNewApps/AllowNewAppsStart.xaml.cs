@@ -28,6 +28,7 @@ using AppControlManager.Others;
 using AppControlManager.SiPolicy;
 using AppControlManager.SiPolicyIntel;
 using AppControlManager.ViewModels;
+using AppControlManager.WindowComponents;
 using AppControlManager.XMLOps;
 using CommunityToolkit.WinUI;
 using Microsoft.Extensions.DependencyInjection;
@@ -45,13 +46,14 @@ namespace AppControlManager.Pages;
 /// AllowNewAppsStart is a page that manages the process of allowing new applications through policy management. It
 /// handles user interactions for selecting policies, scanning directories, and creating supplemental policies.
 /// </summary>
-internal sealed partial class AllowNewAppsStart : Page, Sidebar.IAnimatedIconsManager
+internal sealed partial class AllowNewAppsStart : Page, IAnimatedIconsManager
 {
 
 #pragma warning disable CA1822
 	private AllowNewAppsVM ViewModel { get; } = App.AppHost.Services.GetRequiredService<AllowNewAppsVM>();
 	private PolicyEditorVM PolicyEditorViewModel { get; } = App.AppHost.Services.GetRequiredService<PolicyEditorVM>();
 	private AppSettings.Main AppSettings { get; } = App.AppHost.Services.GetRequiredService<AppSettings.Main>();
+	private SidebarVM sideBarVM { get; } = App.AppHost.Services.GetRequiredService<SidebarVM>();
 #pragma warning restore CA1822
 
 
@@ -130,77 +132,34 @@ internal sealed partial class AllowNewAppsStart : Page, Sidebar.IAnimatedIconsMa
 	/// </summary>
 	public static AllowNewAppsStart Instance => _instance ?? throw new InvalidOperationException("AllowNewAppsStart is not initialized.");
 
-
 	#region Augmentation Interface
-
-
-	// Exposing the AnimatedIcon via class instance since this is an internal page managed by AllowNewApps page's own NavigationView
-	internal AnimatedIcon BrowseForXMLPolicyButtonLightAnimatedIconPub => BrowseForXMLPolicyButtonLightAnimatedIcon;
 
 	// Exposing more elements to the main page of AllowNewApps since this is a sub-page managed by a 2nd NavigationView
 	internal Flyout BrowseForXMLPolicyButton_FlyOutPub => BrowseForXMLPolicyButton_FlyOut;
 	internal Button BrowseForXMLPolicyButtonPub => BrowseForXMLPolicyButton;
 	internal TextBox BrowseForXMLPolicyButton_SelectedBasePolicyTextBoxPub => BrowseForXMLPolicyButton_SelectedBasePolicyTextBox;
 
-
-	private string? unsignedBasePolicyPathFromSidebar;
-
-
-	/// <summary>
-	/// Sets the visibility of various UI elements and updates button content and event handlers based on the provided
-	/// visibility state.
-	/// </summary>
-	/// <param name="visibility">Controls the visibility state of the UI elements.</param>
-	/// <param name="unsignedBasePolicyPath">Stores the path for the unsigned policy from the sidebar.</param>
-	/// <param name="button1">Represents the first button whose visibility and content are updated.</param>
-	/// <param name="button2">Represents the second button, though it is not modified in this context.</param>
-	/// <param name="button3">Represents the third button, though it is not modified in this context.</param>
-	/// <param name="button4">Represents the fourth button, though it is not modified in this context.</param>
-	/// <param name="button5">Represents the fifth button, though it is not modified in this context.</param>
-	public void SetVisibility(Visibility visibility, string? unsignedBasePolicyPath, Button? button1, Button? button2, Button? button3, Button? button4, Button? button5)
+	public void SetVisibility(Visibility visibility)
 	{
-
-		ArgumentNullException.ThrowIfNull(button1);
-
 		// Light up the local page's button icons
-		BrowseForXMLPolicyButtonLightAnimatedIcon.Visibility = visibility;
+		ViewModel.BrowseForXMLPolicyButtonLightAnimatedIconVisibility = visibility;
 
-		// Light up the sidebar buttons' icons
-		button1.Visibility = visibility;
-
-		// Set the incoming text which is from sidebar for unsigned policy path to a local private variable
-		unsignedBasePolicyPathFromSidebar = unsignedBasePolicyPath;
-
-
-		if (visibility is Visibility.Visible)
-		{
-			// Assign sidebar buttons' content texts
-			button1.Content = "Allow New Apps Base Policy";
-
-			// Assign a local event handler to the sidebar button
-			button1.Click += LightUp1;
-			// Save a reference to the event handler we just set for tracking
-			Sidebar.EventHandlersTracking.SidebarUnsignedBasePolicyConnect1EventHandler = LightUp1;
-
-		}
-
+		sideBarVM.AssignActionPacks(
+		(param => LightUp1(), "Allow New Apps Base Policy"),
+		null, null, null, null);
 	}
 
 	/// <summary>
 	/// Local event handlers that are assigned to the sidebar button
 	/// </summary>
-	/// <param name="sender"></param>
-	/// <param name="e"></param>
-	private void LightUp1(object sender, RoutedEventArgs e)
+	private void LightUp1()
 	{
 		BrowseForXMLPolicyButton_FlyOut.ShowAt(BrowseForXMLPolicyButton);
-		BrowseForXMLPolicyButton_SelectedBasePolicyTextBox.Text = unsignedBasePolicyPathFromSidebar;
-		selectedXMLFilePath = unsignedBasePolicyPathFromSidebar;
+		BrowseForXMLPolicyButton_SelectedBasePolicyTextBox.Text = MainWindowVM.SidebarBasePolicyPathTextBoxTextStatic;
+		selectedXMLFilePath = MainWindowVM.SidebarBasePolicyPathTextBoxTextStatic;
 	}
 
-
 	#endregion
-
 
 	#region Steps management
 
@@ -211,8 +170,8 @@ internal sealed partial class AllowNewAppsStart : Page, Sidebar.IAnimatedIconsMa
 		SupplementalPolicyNameTextBox.IsEnabled = false;
 		Step1Grid.Opacity = 0.5;
 		ResetBorderStyles(Step1Border);
-		Step1InfoBar.IsOpen = false;
-		Step1InfoBar.Message = null;
+		ViewModel.Step1InfoBar_IsOpen = false;
+		ViewModel.Step1InfoBar_Message = null;
 		LogSizeNumberBox.IsEnabled = false;
 	}
 
@@ -232,8 +191,8 @@ internal sealed partial class AllowNewAppsStart : Page, Sidebar.IAnimatedIconsMa
 		GoToStep3Button.IsEnabled = false;
 		Step2Grid.Opacity = 0.5;
 		ResetBorderStyles(Step2Border);
-		Step2InfoBar.IsOpen = false;
-		Step2InfoBar.Message = null;
+		ViewModel.Step2InfoBar_IsOpen = false;
+		ViewModel.Step2InfoBar_Message = null;
 	}
 
 	private void EnableStep2()
@@ -251,8 +210,8 @@ internal sealed partial class AllowNewAppsStart : Page, Sidebar.IAnimatedIconsMa
 		CreatePolicyButton.IsEnabled = false;
 		Step3Grid.Opacity = 0.5;
 		ResetBorderStyles(Step3Border);
-		Step3InfoBar.IsOpen = false;
-		Step3InfoBar.Message = null;
+		ViewModel.Step3InfoBar_IsOpen = false;
+		ViewModel.Step3InfoBar_Message = null;
 	}
 
 	private void EnableStep3()
@@ -281,6 +240,10 @@ internal sealed partial class AllowNewAppsStart : Page, Sidebar.IAnimatedIconsMa
 			GoToStep2Button.IsEnabled = false;
 			ResetStepsButton.IsEnabled = false;
 
+			ViewModel.Step1InfoBar_IsOpen = true;
+			ViewModel.Step1InfoBar_IsClosable = false;
+			ViewModel.Step1InfoBar_Severity = InfoBarSeverity.Informational;
+			ViewModel.Step1InfoBar_Message = "Starting...";
 
 			// Ensure the text box for policy file name is filled
 			if (string.IsNullOrWhiteSpace(SupplementalPolicyNameTextBox.Text))
@@ -328,7 +291,6 @@ internal sealed partial class AllowNewAppsStart : Page, Sidebar.IAnimatedIconsMa
 				{
 					throw new InvalidOperationException($"The selected policy file {selectedXMLFilePath} is not deployed on the system.");
 				}
-
 
 				// If the policy doesn't have any rule options or it doesn't have the EnabledUnsignedSystemIntegrityPolicy rule option then it is signed
 				_IsSignedPolicy = (!_BasePolicyObject.Rules.Any(rule => rule.Item is OptionType.EnabledUnsignedSystemIntegrityPolicy));
@@ -378,8 +340,7 @@ internal sealed partial class AllowNewAppsStart : Page, Sidebar.IAnimatedIconsMa
 
 				_ = DispatcherQueue.TryEnqueue(() =>
 				{
-					Step1InfoBar.IsOpen = true;
-					Step1InfoBar.Message = "Deploying the selected policy in Audit mode, please wait";
+					ViewModel.Step1InfoBar_Message = "Deploying the selected policy in Audit mode, please wait";
 				});
 
 				// Creating a copy of the original policy in the Staging Area so that the original one will be unaffected
@@ -450,23 +411,25 @@ internal sealed partial class AllowNewAppsStart : Page, Sidebar.IAnimatedIconsMa
 			// Capture the current time so that the audit logs that will be displayed will be newer than that
 			LogsScanStartTime = DateTime.Now;
 		}
-		catch
+		catch (Exception ex)
 		{
 			errorOccurred = true;
 
-			throw;  // Re-throw the same exception, preserving the stack trace
+			ViewModel.Step1InfoBar_Message = ex.Message;
+			ViewModel.Step1InfoBar_Severity = InfoBarSeverity.Error;
+
+			Logger.Write(ErrorWriter.FormatException(ex)); // Log the full exception details
 		}
 		finally
 		{
 			Step1ProgressRing.IsActive = false;
 			ResetStepsButton.IsEnabled = true;
+			ViewModel.Step1InfoBar_IsClosable = true;
 
 			// Only re-enable the button if errors occurred, otherwise we don't want to override the work that DisableStep1() method does
 			if (errorOccurred)
 			{
 				GoToStep2Button.IsEnabled = true;
-				Step1InfoBar.Message = null;
-				Step1InfoBar.IsOpen = false;
 
 				// Clear the variables if errors occurred in step 1
 				_BasePolicyObject = null;
@@ -490,14 +453,16 @@ internal sealed partial class AllowNewAppsStart : Page, Sidebar.IAnimatedIconsMa
 			GoToStep3Button.IsEnabled = false;
 			ResetStepsButton.IsEnabled = false;
 
+			ViewModel.Step2InfoBar_IsClosable = false;
+			ViewModel.Step2InfoBar_IsOpen = true;
+			ViewModel.Step2InfoBar_Severity = InfoBarSeverity.Informational;
+
 			// While the base policy is being deployed is audit mode, set the progress ring as indeterminate
 			Step2ProgressRing.IsIndeterminate = true;
 
 			// Enable the ListView pages so user can select the logs
 			ViewModel.EventLogsMenuItemState = true;
 			ViewModel.LocalFilesMenuItemState = true;
-
-			Step2InfoBar.IsOpen = true;
 
 			await Task.Run(async () =>
 			{
@@ -510,7 +475,7 @@ internal sealed partial class AllowNewAppsStart : Page, Sidebar.IAnimatedIconsMa
 
 				_ = DispatcherQueue.TryEnqueue(() =>
 				{
-					Step2InfoBar.Message = "Deploying the Enforced mode policy.";
+					ViewModel.Step2InfoBar_Message = "Deploying the Enforced mode policy.";
 				});
 
 #if !DEBUG
@@ -530,7 +495,7 @@ internal sealed partial class AllowNewAppsStart : Page, Sidebar.IAnimatedIconsMa
 
 					_ = DispatcherQueue.TryEnqueue(() =>
 					{
-						Step2InfoBar.Message = "Scanning the selected directories";
+						ViewModel.Step2InfoBar_Message = "Scanning the selected directories";
 
 						// Set the progress ring to no longer be indeterminate since file scan will take control of its value
 						Step2ProgressRing.IsIndeterminate = false;
@@ -550,7 +515,7 @@ internal sealed partial class AllowNewAppsStart : Page, Sidebar.IAnimatedIconsMa
 
 						_ = DispatcherQueue.TryEnqueue(() =>
 						{
-							Step2InfoBar.Message = $"Scanning {DetectedFilesInSelectedDirectories.Item2} files found in the selected directories";
+							ViewModel.Step2InfoBar_Message = $"Scanning {DetectedFilesInSelectedDirectories.Item2} files found in the selected directories";
 
 							// Set the progress ring to no longer be indeterminate since file scan will take control of its value
 							Step2ProgressRing.IsIndeterminate = false;
@@ -584,7 +549,7 @@ internal sealed partial class AllowNewAppsStart : Page, Sidebar.IAnimatedIconsMa
 			ViewModel.LocalFilesCountInfoBadgeValue = ViewModel.LocalFilesFileIdentities.Count;
 			ViewModel.LocalFilesCountInfoBadgeOpacity = 1;
 
-			Step2InfoBar.Message = "Scanning the event logs";
+			ViewModel.Step2InfoBar_Message = "Scanning the event logs";
 
 			// Log scanning doesn't produce determinate real time progress so setting it as indeterminate
 			Step2ProgressRing.IsIndeterminate = true;
@@ -604,7 +569,7 @@ internal sealed partial class AllowNewAppsStart : Page, Sidebar.IAnimatedIconsMa
 
 #endif
 
-			Step2InfoBar.Message = $"{Output.Count} log(s) were generated during the Audit phase";
+			ViewModel.Step2InfoBar_Message = $"{Output.Count} log(s) were generated during the Audit phase";
 
 			// If any logs were generated since audit mode policy was deployed
 			if (Output.Count > 0)
@@ -637,25 +602,26 @@ internal sealed partial class AllowNewAppsStart : Page, Sidebar.IAnimatedIconsMa
 			DisableStep2();
 			EnableStep3();
 		}
-		catch
+		catch (Exception ex)
 		{
 			errorsOccurred = true;
 
-			throw;
+			ViewModel.Step2InfoBar_Message = ex.Message;
+
+			ViewModel.Step2InfoBar_Severity = InfoBarSeverity.Error;
+
+			Logger.Write(ErrorWriter.FormatException(ex));
 		}
 		finally
 		{
 			Step2ProgressRing.IsActive = false;
 			ResetStepsButton.IsEnabled = true;
+			ViewModel.Step2InfoBar_IsClosable = true;
 
-			// Only perform these actions if an error occurred
 			if (errorsOccurred)
 			{
+				// Re-enable the button allowing the user to fix any potential issues.
 				GoToStep3Button.IsEnabled = true;
-
-				// When an error occurs before the disable methods run, we need to clear them manually here
-				Step2InfoBar.IsOpen = false;
-				Step2InfoBar.Message = null;
 			}
 		}
 	}
@@ -669,13 +635,17 @@ internal sealed partial class AllowNewAppsStart : Page, Sidebar.IAnimatedIconsMa
 		try
 		{
 			ResetStepsButton.IsEnabled = false;
-
 			ResetProgressRing.IsActive = true;
 
 			// Disable all steps
 			DisableStep1();
 			DisableStep2();
 			DisableStep3();
+
+			ViewModel.Step1InfoBar_IsOpen = true;
+			ViewModel.Step1InfoBar_IsClosable = false;
+			ViewModel.Step1InfoBar_Severity = InfoBarSeverity.Informational;
+			ViewModel.Step1InfoBar_Message = "Resetting...";
 
 			// Hide the action button for InfoBar in Step 3 that offers to open the supplemental policy in the Policy Editor
 			ViewModel.OpenInPolicyEditorInfoBarActionButtonVisibility = Visibility.Collapsed;
@@ -740,6 +710,14 @@ internal sealed partial class AllowNewAppsStart : Page, Sidebar.IAnimatedIconsMa
 				SnapBackGuarantee.Remove();
 			});
 
+			ViewModel.Step1InfoBar_Severity = InfoBarSeverity.Success;
+			ViewModel.Step1InfoBar_Message = "Reset was successful.";
+		}
+		catch (Exception ex)
+		{
+			ViewModel.Step1InfoBar_Message = ex.Message;
+			ViewModel.Step1InfoBar_Severity = InfoBarSeverity.Error;
+			Logger.Write(ErrorWriter.FormatException(ex));
 		}
 		finally
 		{
@@ -747,6 +725,8 @@ internal sealed partial class AllowNewAppsStart : Page, Sidebar.IAnimatedIconsMa
 			EnableStep1();
 			ResetProgressRing.IsActive = false;
 			ResetStepsButton.IsEnabled = true;
+
+			ViewModel.Step1InfoBar_IsClosable = true;
 		}
 	}
 
@@ -836,7 +816,6 @@ internal sealed partial class AllowNewAppsStart : Page, Sidebar.IAnimatedIconsMa
 
 	private void SetBorderStyles(Border border)
 	{
-
 		// Create a LinearGradientBrush
 		LinearGradientBrush linearGradientBrush = new()
 		{
@@ -882,9 +861,8 @@ internal sealed partial class AllowNewAppsStart : Page, Sidebar.IAnimatedIconsMa
 
 	#endregion
 
-
 	/// <summary>
-	/// Event handler for the Create Policy button
+	/// Event handler for the Create Policy button - Step 3
 	/// </summary>
 	private async void CreatePolicyButton_Click()
 	{
@@ -897,10 +875,10 @@ internal sealed partial class AllowNewAppsStart : Page, Sidebar.IAnimatedIconsMa
 
 			ViewModel.OpenInPolicyEditorInfoBarActionButtonVisibility = Visibility.Collapsed;
 
-			Step3InfoBar.IsOpen = true;
-			Step3InfoBar.Severity = InfoBarSeverity.Informational;
-			Step3InfoBar.Message = "Creating the policy using any available event logs or file scan results in other tabs.";
-
+			ViewModel.Step3InfoBar_IsOpen = true;
+			ViewModel.Step3InfoBar_Severity = InfoBarSeverity.Informational;
+			ViewModel.Step3InfoBar_Message = "Creating the policy using any available event logs or file scan results in other tabs.";
+			ViewModel.Step3InfoBar_IsClosable = false;
 
 			// Check if there are items for the local file scans ListView
 			if (ViewModel.LocalFilesAllFileIdentities.Count > 0)
@@ -925,8 +903,8 @@ internal sealed partial class AllowNewAppsStart : Page, Sidebar.IAnimatedIconsMa
 			// If there are no logs to create a Supplemental policy with
 			if (fileIdentities.Count is 0)
 			{
-				Step3InfoBar.Severity = InfoBarSeverity.Warning;
-				Step3InfoBar.Message = "There are no logs or files in any data grids to create a Supplemental policy for.";
+				ViewModel.Step3InfoBar_Severity = InfoBarSeverity.Warning;
+				ViewModel.Step3InfoBar_Message = "There are no logs or files in any data grids to create a Supplemental policy for.";
 				return;
 			}
 
@@ -1015,17 +993,23 @@ internal sealed partial class AllowNewAppsStart : Page, Sidebar.IAnimatedIconsMa
 
 			});
 
-			Step3InfoBar.Severity = InfoBarSeverity.Success;
-			Step3InfoBar.IsClosable = true;
-			Step3InfoBar.Message = ViewModel.DeployPolicy ? "Successfully created and deployed the policy." : "Successfully created the policy.";
+			ViewModel.Step3InfoBar_Severity = InfoBarSeverity.Success;
+			ViewModel.Step3InfoBar_Message = ViewModel.DeployPolicy ? "Successfully created and deployed the policy." : "Successfully created the policy.";
 
+			ViewModel.OpenInPolicyEditorInfoBarActionButtonVisibility = Visibility.Visible;
+		}
+		catch (Exception ex)
+		{
+			ViewModel.Step3InfoBar_Message = ex.Message;
+			ViewModel.Step3InfoBar_Severity = InfoBarSeverity.Error;
+
+			Logger.Write(ErrorWriter.FormatException(ex));
 		}
 		finally
 		{
 			CreatePolicyButton.IsEnabled = true;
 			ResetStepsButton.IsEnabled = true;
-
-			ViewModel.OpenInPolicyEditorInfoBarActionButtonVisibility = Visibility.Visible;
+			ViewModel.Step3InfoBar_IsClosable = true;
 
 			// Clear the private variable after the policy is created. This allows the user to remove some items from the logs and recreate the policy with less data if needed.
 			fileIdentities.FileIdentitiesInternal.Clear();

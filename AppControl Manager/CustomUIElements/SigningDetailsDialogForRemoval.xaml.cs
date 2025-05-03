@@ -37,7 +37,6 @@ internal sealed partial class SigningDetailsDialogForRemoval : ContentDialogV2
 
 	private AppSettings.Main AppSettings { get; } = App.AppHost.Services.GetRequiredService<AppSettings.Main>();
 
-
 	// Properties to access the input value
 	internal string? CertificatePath { get; private set; }
 	internal string? CertificateCommonName { get; private set; }
@@ -142,7 +141,7 @@ internal sealed partial class SigningDetailsDialogForRemoval : ContentDialogV2
 		// Hide the dialog box
 		this.Hide();
 
-		MainWindow.Instance.NavView_Navigate(typeof(Pages.Settings), null);
+		App._nav.Navigate(typeof(Pages.Settings), null);
 	}
 
 

@@ -384,7 +384,7 @@ internal sealed partial class CreateDenyPolicy : Page
 
 	private void FilesAndFoldersViewFileDetailsSettingsCard_Click()
 	{
-		MainWindow.Instance.NavView_Navigate(typeof(CreateDenyPolicyFilesAndFoldersScanResults), null);
+		App._nav.Navigate(typeof(CreateDenyPolicyFilesAndFoldersScanResults), null);
 	}
 
 	/// <summary>
