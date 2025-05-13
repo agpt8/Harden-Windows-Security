@@ -22,7 +22,9 @@ using Microsoft.Windows.ApplicationModel.Resources;
 
 namespace AppControlManager.Others;
 
-// This class defines constants and other variables used by the entire application
+/// <summary>
+/// This class defines constants and other variables used by the entire application
+/// </summary>
 internal static class GlobalVars
 {
 	// Instantiate the ResourceLoader object to access the strings in the Resource.resw file
@@ -58,8 +60,12 @@ internal static class GlobalVars
 	// Handle of the main Window - acquired in the MainWindow.xaml.cs
 	internal static nint hWnd;
 
+	// Product ID of the application when installed from the Microsoft Store
+	internal static string StoreProductID = "9PNG1JDDTGP8";
+
 	// The filters for the file pickers dialogs to select files based on specific extensions
 	internal const string XMLFilePickerFilter = "XML file|*.xml";
+	internal const string XSDFilePickerFilter = "XSD file|*.xsd";
 	internal const string XMLAndCIPFilePickerFilter = "XML and CIP files (*.xml;*.cip)|*.xml;*.cip";
 	internal const string AnyFilePickerFilter = "Any file (*.*)|*.*";
 	internal const string ExecutablesPickerFilter = "Executable file|*.exe";
@@ -74,6 +80,15 @@ internal static class GlobalVars
 
 	// Path to the ISGBasedSupplementalPolicy.xml file
 	internal static readonly string ISGOnlySupplementalPolicyPath = Path.Combine(AppContext.BaseDirectory, "Resources", "ISGBasedSupplementalPolicy.xml");
+
+	// Path to the Allow All template policy file
+	internal static readonly string AllowAllTemplatePolicyPath = Path.Combine(AppContext.BaseDirectory, "Resources", "Allow All Policy.xml");
+
+	// Path to the Allow Microsoft template policy file
+	internal static readonly string AllowMicrosoftTemplatePolicyPath = Path.Combine(AppContext.BaseDirectory, "Resources", "Allow Microsoft Template.xml");
+
+	// Path to the Default Windows template policy file
+	internal static readonly string DefaultWindowsTemplatePolicyPath = Path.Combine(AppContext.BaseDirectory, "Resources", "Default Windows Template.xml");
 
 	// Path to the empty policy file in app resources
 	internal static readonly string EmptyPolicyPath = Path.Combine(AppContext.BaseDirectory, "Resources", "EmptyPolicy.xml");

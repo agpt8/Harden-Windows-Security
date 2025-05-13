@@ -78,7 +78,7 @@
     <!-- https://learn.microsoft.com/dotnet/core/deploying/native-aot/optimizing -->
 
     <ErrorReport>send</ErrorReport>
-    <FileVersion>2.0.19.0</FileVersion>
+    <FileVersion>2.0.20.0</FileVersion>
     <AssemblyVersion>$(FileVersion)</AssemblyVersion>
     <NeutralLanguage>en-US</NeutralLanguage>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
@@ -361,7 +361,10 @@
     <None Remove="Pages\ValidatePolicy.xaml" />
     <None Remove="Pages\ViewCurrentPolicies.xaml" />
     <None Remove="Pages\ViewFileCertificates.xaml" />
+    <None Remove="Resources\Allow All Policy.xml" />
+    <None Remove="Resources\Allow Microsoft Template.xml" />
     <None Remove="Resources\AppControlManagerSupplementalPolicy.xml" />
+    <None Remove="Resources\Default Windows Template.xml" />
     <None Remove="Resources\EmptyPolicy.xml" />
     <None Remove="Resources\ISGBasedSupplementalPolicy.xml" />
     <None Remove="Resources\StrictKernelMode.xml" />
@@ -388,7 +391,16 @@
     <Content Include="CppInterop\ScheduledTaskManager-x64.exe">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Resources\Allow All Policy.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Allow Microsoft Template.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Resources\AppControlManagerSupplementalPolicy.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Default Windows Template.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\EmptyPolicy.xml">
@@ -456,9 +468,9 @@
     <Content Remove="Animated Icon Sources\**" />
     <None Remove="Animated Icon Sources\**" />
 
-    <Compile Remove="Excluded Code\**" />
-    <Content Remove="Excluded Code\**" />
-    <None Remove="Excluded Code\**" />
+    <Compile Remove="eXclude\**" />
+    <Content Remove="eXclude\**" />
+    <None Remove="eXclude\**" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\LICENSE">
